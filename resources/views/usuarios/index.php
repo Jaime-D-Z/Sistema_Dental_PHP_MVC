@@ -38,7 +38,7 @@ $search = $data['search'];
     <div class="collapse navbar-collapse">
         <div class="navbar-nav">
             <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-            <a class="nav-link" href="#">Mantenimiento</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
             <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
             <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
             <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
@@ -59,10 +59,10 @@ $search = $data['search'];
 <a class="btn btn-outline-secondary" href="/resources/views/layouts/index.php">← Volver al menú</a>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">➕ Nuevo Usuario</button>
         </div>
-        <form method="GET" action="usuarios.php" class="d-flex" style="gap:10px;">
+        <form method="GET" action="index.php"    class="d-flex" style="gap:10px;">
             <input type="text" name="search" class="form-control" placeholder="Buscar usuario..." value="<?= htmlspecialchars($search) ?>">
             <button type="submit" class="btn btn-success"><i class="bi bi-search"></i></button>
-            <a href="usuarios.php" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise"></i></a>
+            <a href="index.php" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise"></i></a>
         </form>
     </div>
 
@@ -218,5 +218,21 @@ function confirmarEliminacion(id) {
 <?php endif; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<?php if (isset($_GET['search']) && mb_strlen(trim($_GET['search'])) < 3 && mb_strlen(trim($_GET['search'])) > 0): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Búsqueda muy corta',
+        text: 'Por favor, escribe al menos 3 letras para buscar usuarios.',
+        confirmButtonColor: '#ffc107'
+      });
+
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+    });
+  </script>
+<?php endif; ?>
+
 </body>
 </html>

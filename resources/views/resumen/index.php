@@ -49,7 +49,7 @@ foreach ($resultados as $fila) {
   <div class="collapse navbar-collapse">
     <div class="navbar-nav">
       <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-      <a class="nav-link" href="#">Mantenimiento</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
       <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
       <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
       <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>

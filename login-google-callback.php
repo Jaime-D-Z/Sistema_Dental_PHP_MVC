@@ -1,58 +1,69 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/config/Database.php';
-require_once __DIR__ . '/config/google-config.php';
+require_once __DIR__ . '/../../../config/Database.php';
+require_once __DIR__ . '/../../../config/google-config.php';
 
-// Validar código de Google
-if (!isset($_GET['code'])) {
-    exit('No se recibió código de Google.');
-}
+if (isset($_GET['code'])) {
+    try {
+        $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
+        $client->setAccessToken($token['access_token']);
 
-try {
-    // Obtener token de acceso desde el código de Google
-    $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
-    if (isset($token['error'])) {
-        throw new Exception(json_encode($token));
-    }
+        // Obtener datos del usuario
+        $google_oauth = new Google_Service_Oauth2($client);
+        $google_user = $google_oauth->userinfo->get();
 
-    $client->setAccessToken($token['access_token']);
+        $email = $google_user->email;
+        $name = $google_user->name;
 
-    // Obtener info del usuario
-    $google_service = new Google_Service_Oauth2($client);
-    $user_info = $google_service->userinfo->get();
+        $conn = Database::connect();
 
-    // Buscar o insertar usuario en la base de datos
-    $conn = Database::connect();
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND is_deleted = 0");
-    $stmt->execute([$user_info->email]);
-    $u = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Verifica si ya existe
+        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND is_deleted = 0");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($u) {
-        // Usuario ya existe
+        if (!$user) {
+            // Crear nuevo usuario con rol 'patient'
+            $stmt = $conn->prepare("INSERT INTO users (name, email, role, is_active, is_deleted) VALUES (?, ?, 'patient', 1, 0)");
+            $stmt->execute([$name, $email]);
+
+            $user_id = $conn->lastInsertId();
+            $user = [
+                'id' => $user_id,
+                'name' => $name,
+                'role' => 'patient'
+            ];
+        } else {
+            if (!$user['is_active']) {
+                $_SESSION['errors'] = ['Usuario desactivado. Contacte al administrador.'];
+                header("Location: login.php");
+                exit;
+            }
+        }
+
+        // Guardar en sesión
         $_SESSION['user'] = [
-            'id' => $u['id'],
-            'name' => $u['name'],
-            'role' => $u['role']
+            'id' => $user['id'],
+            'name' => $user['name'],
+            'role' => $user['role']
         ];
-    } else {
-        // Crear nuevo usuario como "patient"
-        $stmt = $conn->prepare("INSERT INTO users (name, email, role, password) VALUES (?, ?, 'patient', '')");
-        $stmt->execute([$user_info->name, $user_info->email]);
-        $id = $conn->lastInsertId();
 
-        $_SESSION['user'] = [
-            'id' => $id,
-            'name' => $user_info->name,
-            'role' => 'patient'
-        ];
+        // Redirigir según el rol
+        if ($user['role'] === 'doctor') {
+            header("Location: /resources/views/layouts/medico_index.php");
+        } else {
+            header("Location: /resources/views/layouts/index.php");
+        }
+        exit;
+
+    } catch (Exception $e) {
+        $_SESSION['errors'] = ['Error al iniciar sesión con Google: ' . $e->getMessage()];
+        header("Location: login.php");
+        exit;
     }
-
-    // Redirigir al panel principal por el puerto 3000
-    header("Location: http://localhost:3000/resources/views/layouts/index.php");
-    exit;
-
-} catch (Exception $e) {
-    echo 'Error Google: ', htmlspecialchars($e->getMessage());
+} else {
+    $_SESSION['errors'] = ['Acceso denegado o cancelado'];
+    header("Location: login.php");
     exit;
 }

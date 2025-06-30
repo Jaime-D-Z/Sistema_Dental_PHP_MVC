@@ -7,55 +7,55 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $db = Database::connect();
 
-// Asegurarse que sea médico autenticado
+// Validar sesión
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'doctor') {
     header("Location: /resources/views/auth/login.php");
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $user_id        = $_SESSION['user']['id'];
-    $dni_paciente   = trim($_POST['dni_paciente'] ?? '');
-    $treatment_id   = $_POST['treatment_id'] ?? null;
-    $date           = $_POST['date'] ?? null;
-    $time           = $_POST['time'] ?? null;
-    $diagnosis      = $_POST['diagnosis'] ?? '';
-    $status         = $_POST['status'] ?? null;
-    $cost           = $_POST['cost'] ?? 0;
-    $amount_paid    = $_POST['paid'] ?? 0;
-    $notes          = $_POST['notes'] ?? '';
+    $user_id      = $_SESSION['user']['id'];
+    $dni_paciente = trim($_POST['dni_paciente'] ?? '');
+    $treatment_id = $_POST['treatment_id'] ?? null;
+    $date         = $_POST['date'] ?? null;
+    $time         = $_POST['time'] ?? null;
+    $diagnosis    = $_POST['diagnosis'] ?? '';
+    $status       = $_POST['status'] ?? null;
+    $cost         = $_POST['cost'] ?? 0;
+    $amount_paid  = $_POST['paid'] ?? 0;
+    $notes        = $_POST['notes'] ?? '';
 
     if (!$dni_paciente || !$treatment_id || !$date || !$time || !$status) {
-        header("Location: index.php?error=campos_incompletos");
+        $_SESSION['flash'] = ['type' => 'error', 'message' => 'Completa todos los campos obligatorios.'];
+        header("Location: index.php");
         exit;
     }
 
     try {
-        // Obtener doctor_id desde tabla doctors usando user_id
         $stmt = $db->prepare("SELECT id FROM doctors WHERE user_id = ? AND is_deleted = 0 AND is_active = 1");
         $stmt->execute([$user_id]);
         $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$doctor) {
-            echo "Error: No se encontró el perfil del médico actual.";
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Perfil de médico no encontrado.'];
+            header("Location: index.php");
             exit;
         }
 
         $doctor_id = $doctor['id'];
 
-        // Buscar paciente por DNI
         $stmt = $db->prepare("SELECT id FROM patients WHERE TRIM(dni) = ? AND is_deleted = 0 AND is_active = 1");
         $stmt->execute([$dni_paciente]);
         $patient = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$patient) {
-            header("Location: index.php?error=paciente_no_encontrado&dni=" . urlencode($dni_paciente));
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Paciente no encontrado.'];
+            header("Location: index.php");
             exit;
         }
 
         $patient_id = $patient['id'];
 
-        // Registrar cita
         $stmt = $db->prepare("
             INSERT INTO appointments (
                 patient_id, doctor_id, treatment_id,
@@ -72,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $appointment_id = $db->lastInsertId();
 
-        // Si pagó algo, registrar el pago
         if ($amount_paid > 0) {
             $pago = $db->prepare("
                 INSERT INTO payments (
@@ -84,13 +83,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pago->execute([$appointment_id, $amount_paid]);
         }
 
-        header("Location: index.php?success=registrada");
+        $_SESSION['flash'] = ['type' => 'success', 'message' => 'Cita registrada con éxito.'];
+        header("Location: index.php");
         exit;
 
     } catch (Exception $e) {
-        echo "Error al registrar la cita: " . $e->getMessage();
+        $_SESSION['flash'] = ['type' => 'error', 'message' => 'Error al registrar la cita.'];
+        header("Location: index.php");
+        exit;
     }
-
 } else {
-    echo "Acceso inválido.";
+    $_SESSION['flash'] = ['type' => 'error', 'message' => 'Acceso inválido.'];
+    header("Location: index.php");
+    exit;
 }

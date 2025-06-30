@@ -8,6 +8,7 @@ $conn = Database::connect();
 $patient = null;
 $appointment = null;
 
+// Obtener paciente y última cita por DNI
 if (!empty($_GET['dni'])) {
   $stmt = $conn->prepare("SELECT * FROM patients WHERE dni = ?");
   $stmt->execute([$_GET['dni']]);
@@ -19,10 +20,28 @@ if (!empty($_GET['dni'])) {
     $appointment = $stmt2->fetch(PDO::FETCH_ASSOC);
   }
 }
+
 $appointment_id = isset($appointment['id']) ? intval($appointment['id']) : 0;
 $patient_id = isset($patient['id']) ? intval($patient['id']) : 0;
-?>
 
+// ✅ Obtener todos los botones agrupados por zona
+$stmtBotones = $conn->prepare("SELECT * FROM odontograma_buttons WHERE is_active = 1 AND is_deleted = 0");
+$stmtBotones->execute();
+$botonesRaw = $stmtBotones->fetchAll(PDO::FETCH_ASSOC);
+
+// Agrupar los botones por zona incluyendo centro
+$botonesPorZona = [];
+$zonas = ['superior', 'inferior', 'izquierda', 'derecha', 'centro'];
+foreach ($botonesRaw as $btn) {
+  if ($btn['zona'] === 'todos') {
+    foreach ($zonas as $zona) {
+      $botonesPorZona[$zona][] = $btn;
+    }
+  } else {
+    $botonesPorZona[$btn['zona']][] = $btn;
+  }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -242,7 +261,7 @@ $patient_id = isset($patient['id']) ? intval($patient['id']) : 0;
   <div class="collapse navbar-collapse">
     <div class="navbar-nav">
       <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-      <a class="nav-link" href="#">Mantenimiento</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
       <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
       <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
       <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
@@ -418,10 +437,10 @@ $patient_id = isset($patient['id']) ? intval($patient['id']) : 0;
     </table>
   </div>
 </div>
-
   </div>
 
-  <<!-- Modal para seleccionar tratamiento -->
+
+<!-- Modal para seleccionar tratamiento -->
 <div class="modal fade" id="toothModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <form id="formTooth">
@@ -434,60 +453,48 @@ $patient_id = isset($patient['id']) ? intval($patient['id']) : 0;
           <input type="hidden" id="toothNumber">
           <input type="hidden" id="toothZone">
 
+          <!-- Tratamiento -->
           <div class="mb-3">
             <label>Tratamiento</label>
             <select id="treatmentSelect" class="form-select">
-              <?php foreach ($conn->query("SELECT id, name, price FROM treatments") as $t): ?>
+              <?php
+              $stmt = $conn->query("SELECT id, name, price FROM treatments WHERE is_active = 1 AND is_deleted = 0");
+              while ($t = $stmt->fetch(PDO::FETCH_ASSOC)):
+              ?>
                 <option value="<?= $t['id'] ?>">
                   <?= htmlspecialchars($t['name']) ?> - S/<?= number_format($t['price'], 2) ?>
                 </option>
-              <?php endforeach; ?>
+              <?php endwhile; ?>
             </select>
           </div>
 
+          <!-- Observación -->
           <div class="mb-3">
             <label>Observación</label>
             <textarea id="observation" class="form-control" rows="2"></textarea>
           </div>
 
-          <!-- Acciones generales -->
-          <div class="mb-3 action-zone-general text-center">
-            <label class="d-block mb-2">Acción</label>
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-              <button type="button" class="btn btn-sm btn-danger actionBtn" data-action="X">X</button>
-              <button type="button" class="btn btn-sm btn-warning actionBtn" data-action="C">Curación</button>
-              <button type="button" class="btn btn-sm btn-primary actionBtn" data-action="E">Extracción</button>
-              <button type="button" class="btn btn-sm btn-secondary actionBtn" data-action="V">Vacío</button>
+          <!-- 🔘 Botones personalizados por zona -->
+          <div id="zone-buttons" class="mb-3 text-center">
+            <!-- Se llenará desde JavaScript -->
+          </div>
+
+          <!-- 🎯 Botones especiales por zona -->
+          <div class="mb-3 center-tools d-none">
+            <div id="center-actions" class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+              <?php foreach (["X","^","O","S","i"] as $sym): ?>
+                <button type="button" class="btn btn-sm btn-outline-danger centerBtn" data-symbol="<?= $sym ?>" data-color="red"><?= $sym ?></button>
+              <?php endforeach; ?>
+            </div>
+
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+              <?php foreach (["X","^","O","S","i"] as $sym): ?>
+                <button type="button" class="btn btn-sm btn-outline-primary centerBtn" data-symbol="<?= $sym ?>" data-color="blue"><?= $sym ?></button>
+              <?php endforeach; ?>
             </div>
           </div>
 
-          <!-- Acciones para zona centro -->
-          <!-- Centro (solo visible si zona == centro) -->
-<div class="mb-3 center-tools d-none">
-  <!-- Primera fila: acciones -->
-  <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
-    <button type="button" class="btn btn-sm btn-danger centerActionBtn" data-symbol="X" data-color="red">X</button>
-    <button type="button" class="btn btn-sm btn-warning centerActionBtn" data-symbol="C" data-color="yellow">Curación</button>
-    <button type="button" class="btn btn-sm btn-primary centerActionBtn" data-symbol="E" data-color="blue">Extracción</button>
-    <button type="button" class="btn btn-sm btn-secondary centerActionBtn" data-symbol="V" data-color="gray">Vacío</button>
-  </div>
-
-  <!-- Segunda fila: símbolos en rojo -->
-  <div class="d-flex justify-content-center gap-2 flex-wrap mb-2">
-    <?php foreach (['X','^','O','S','i'] as $sym): ?>
-      <button type="button" class="btn btn-sm btn-outline-danger centerBtn" data-symbol="<?= $sym ?>" data-color="red"><?= $sym ?></button>
-    <?php endforeach; ?>
-  </div>
-
-  <!-- Tercera fila: símbolos en azul -->
-  <div class="d-flex justify-content-center gap-2 flex-wrap">
-    <?php foreach (['X','^','O','S','i'] as $sym): ?>
-      <button type="button" class="btn btn-sm btn-outline-primary centerBtn" data-symbol="<?= $sym ?>" data-color="blue"><?= $sym ?></button>
-    <?php endforeach; ?>
-  </div>
-</div>
-
-
+        </div>
         <div class="modal-footer">
           <button type="button" id="saveTooth" class="btn btn-success">Guardar</button>
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -496,125 +503,108 @@ $patient_id = isset($patient['id']) ? intval($patient['id']) : 0;
     </form>
   </div>
 </div>
-
-
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const modal = new bootstrap.Modal(document.getElementById('toothModal'));
-  let selZone = null;
-  let selActionFondo = null, selColorFondo = null;
-  let selSimbolo = null, selColorSimbolo = null;
+  let selZone = null, selActionFondo = null, selColorFondo = null, selSimbolo = null, selColorSimbolo = null;
 
-  // Corregido: ahora estas variables vienen de PHP correctamente
   const appointmentId = <?= intval($appointment_id) ?>;
   const patientId = <?= intval($patient_id) ?>;
-
-  console.log('appointment_id:', appointmentId);
-  console.log('paciente_id:', patientId);
+  const botonesPorZona = <?= json_encode($botonesPorZona) ?>;
 
   document.querySelectorAll('.zona').forEach(z => z.addEventListener('click', () => {
     selZone = z;
-    const isCenter = z.dataset.zone === 'centro';
+    const zona = z.dataset.zone;
+    const isCenter = zona === 'centro';
 
     document.querySelector('.center-tools').classList.toggle('d-none', !isCenter);
-    document.querySelector('.action-zone-general').classList.toggle('d-none', isCenter);
+
+    const btnContainer = document.getElementById('zone-buttons');
+    btnContainer.innerHTML = '';
+
+    if (botonesPorZona[zona]) {
+      botonesPorZona[zona].forEach(btn => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-sm m-1';
+        button.style.backgroundColor = btn.color;
+        button.style.color = '#fff';
+        button.textContent = btn.simbolo || btn.nombre;
+        button.dataset.symbol = btn.simbolo || btn.nombre;
+        button.dataset.color = btn.color;
+        button.addEventListener('click', () => {
+          selActionFondo = button.dataset.symbol;
+          selColorFondo = button.dataset.color;
+          selSimbolo = button.dataset.symbol;
+          selColorSimbolo = button.dataset.color;
+          btnContainer.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          button.classList.add('active');
+        });
+        btnContainer.appendChild(button);
+      });
+    }
 
     document.getElementById('toothNumber').value = z.dataset.tooth;
-    document.getElementById('toothZone').value = z.dataset.zone;
-    document.getElementById('modalTitle').textContent = `Diente ${z.dataset.tooth} - ${z.dataset.zone}`;
+    document.getElementById('toothZone').value = zona;
+    document.getElementById('modalTitle').textContent = `Diente ${z.dataset.tooth}`;
     document.getElementById('observation').value = '';
-
-    selActionFondo = null;
-    selColorFondo = null;
-    selSimbolo = null;
-    selColorSimbolo = null;
-
-    document.querySelectorAll('.actionBtn, .centerBtn, .centerActionBtn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.centerBtn').forEach(b => b.classList.remove('active'));
+    selActionFondo = selColorFondo = selSimbolo = selColorSimbolo = null;
     modal.show();
   }));
 
-  document.querySelectorAll('.actionBtn').forEach(b => {
-    b.addEventListener('click', () => {
-      selActionFondo = b.dataset.action || '';
-      selColorFondo = getColorBySymbol(selActionFondo);
-      document.querySelectorAll('.actionBtn').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-    });
-  });
-
-  document.querySelectorAll('.centerActionBtn').forEach(b => {
-    b.addEventListener('click', () => {
-      selActionFondo = b.dataset.symbol || '';
-      selColorFondo = b.dataset.color || '';
-      document.querySelectorAll('.actionBtn, .centerActionBtn').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-    });
-  });
-
   document.querySelectorAll('.centerBtn').forEach(b => {
     b.addEventListener('click', () => {
-      selSimbolo = b.dataset.symbol || '';
-      selColorSimbolo = b.dataset.color || 'black';
+      selSimbolo = b.dataset.symbol;
+      selColorSimbolo = b.dataset.color;
       document.querySelectorAll('.centerBtn').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
     });
   });
 
- document.getElementById('saveTooth').addEventListener('click', (e) => {
-  e.preventDefault();
-
-  if (!selZone || (!selActionFondo && !selSimbolo)) {
-    return alert('Selecciona una acción o símbolo');
-  }
-
-  // Validación opcional
- 
-
-  const zona = document.getElementById('toothZone').value;
-  const pieza = document.getElementById('toothNumber').value;
-
-  const payload = {
-    appointment_id: appointmentId,
-    paciente_id: patientId,
-    pieza: pieza,
-    zona: zona,
-    tratamiento_id: document.getElementById('treatmentSelect').value,
-    observaciones: document.getElementById('observation').value,
-   accion: selActionFondo || '', // acción como texto (ej. C, E, etc.)
-color_fondo: zona === 'centro' ? (selColorFondo || '') : (getColorBySymbol(selActionFondo) || ''),
-simbolo: zona === 'centro' ? (selSimbolo || '') : '',
-color_simbolo: zona === 'centro' ? (selColorSimbolo || '') : ''
-
-  };
-
-  console.log('Payload:', payload);
-
-  fetch('guardar_diente.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.json())
-  .then(res => {
-    if (res.success) {
-      pintarZona(pieza, zona, selActionFondo, payload.color_fondo, selSimbolo, selColorSimbolo);
-      modal.hide();
-    } else {
-      alert(res.error || 'Hubo un error al guardar');
+  document.getElementById('saveTooth').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!selZone || (!selActionFondo && !selSimbolo)) {
+      return alert('Selecciona una acción o símbolo');
     }
+
+    const zona = document.getElementById('toothZone').value;
+    const pieza = document.getElementById('toothNumber').value;
+
+    const payload = {
+      appointment_id: appointmentId,
+      paciente_id: patientId,
+      pieza: pieza,
+      zona: zona,
+      tratamiento_id: document.getElementById('treatmentSelect').value,
+      observaciones: document.getElementById('observation').value,
+      accion: selActionFondo || '',
+      color_fondo: selColorFondo || '',
+      simbolo: selSimbolo || '',
+      color_simbolo: selColorSimbolo || ''
+    };
+
+    fetch('guardar_diente.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        pintarZona(pieza, zona, payload.accion, payload.color_fondo, payload.simbolo, payload.color_simbolo);
+        modal.hide();
+      } else {
+        alert(res.error || 'Error al guardar');
+      }
+    });
   });
-});
 
-
- function pintarZona(pieza, zona, accion, colorFondo = null, simbolo = null, colorSimbolo = null) {
-  const elem = document.querySelector(`.zona[data-tooth="${pieza}"][data-zone="${zona}"]`);
-  if (!elem) return;
-
-  const span = elem.querySelector('.symbol');
-
-  if (zona === 'centro') {
+  function pintarZona(pieza, zona, accion, colorFondo = null, simbolo = null, colorSimbolo = null) {
+    const elem = document.querySelector(`.zona[data-tooth="${pieza}"][data-zone="${zona}"]`);
+    if (!elem) return;
+    const span = elem.querySelector('.symbol');
     if (colorFondo) elem.style.backgroundColor = colorFondo;
     if (span && simbolo) {
       span.textContent = simbolo;
@@ -622,11 +612,7 @@ color_simbolo: zona === 'centro' ? (selColorSimbolo || '') : ''
     } else if (span) {
       span.textContent = '';
     }
-  } else {
-    elem.style.backgroundColor = colorFondo || getColorBySymbol(accion);
   }
-}
-
 
   if (patientId && appointmentId) {
     fetch(`obtener_dientes.php?paciente_id=${patientId}&appointment_id=${appointmentId}`)
@@ -635,26 +621,13 @@ color_simbolo: zona === 'centro' ? (selColorSimbolo || '') : ''
         if (res.success) {
           Object.entries(res.data).forEach(([k, val]) => {
             const [pieza, zona] = k.split('_');
-            const accion = val.accion || '';
-            const colorFondo = val.color_fondo || '';
-            const simbolo = val.simbolo || '';
-            const colorSimbolo = val.color_simbolo || '';
-            pintarZona(pieza, zona, accion, colorFondo, simbolo, colorSimbolo);
+            pintarZona(pieza, zona, val.accion, val.color_fondo, val.simbolo, val.color_simbolo);
           });
         }
       });
   }
-
-  function getColorBySymbol(s) {
-    const cmap = {
-      'X': 'red', 'C': 'yellow', 'E': 'blue', 'V': 'gray',
-      '^': 'orange', 'O': 'black', 'S': 'green', 'i': 'purple'
-    };
-    return cmap[s] || 'lightgray';
-  }
 });
 </script>
-
 
 </body>
 </html>

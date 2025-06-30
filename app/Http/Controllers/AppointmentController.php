@@ -3,15 +3,21 @@ require_once __DIR__ . '/../../Models/Appointment.php';
 
 class AppointmentController {
     public function index() {
-        $appointments = Appointment::all();
-        $treatments = Appointment::getTreatments();
-        $doctors = Appointment::getDoctors();
+        $search = trim($_GET['search'] ?? '');
 
-        // Devolver las variables necesarias
+        if (isset($_GET['search']) && strlen($search) < 2) {
+            // No buscar si escribió algo pero con menos de 2 letras
+            $appointments = [];
+        } else {
+            // Buscar si tiene al menos 2 letras o si no hay búsqueda
+            $appointments = Appointment::all($search);
+        }
+
         return [
             'appointments' => $appointments,
-            'treatments' => $treatments,
-            'doctors' => $doctors
+            'treatments'   => Appointment::getTreatments(),
+            'doctors'      => Appointment::getDoctors(),
+            'search'       => $search
         ];
     }
 }

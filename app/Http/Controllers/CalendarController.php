@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../config/Database.php';
 require_once __DIR__ . '/../../Models/Calendar.php';
 
 class CalendarController {
@@ -7,25 +8,34 @@ class CalendarController {
             session_start();
         }
 
-        // Validar sesión
         if (!isset($_SESSION['user'])) {
             header("Location: /resources/views/auth/login.php");
             exit;
         }
 
-        $role = $_SESSION['user']['role'] ?? null;
+        $user = $_SESSION['user'];
+        $role = $user['role'] ?? null;
         $doctor_id = null;
 
         if ($role === 'doctor') {
-            // Si es doctor, obtener su id para filtrar eventos
-            $doctor_id = $_SESSION['user']['id'];
+            $user_id = $user['id'];
+
+            $db = Database::connect();
+            $stmt = $db->prepare("SELECT id FROM doctors WHERE user_id = ? AND is_deleted = 0 AND is_active = 1");
+            $stmt->execute([$user_id]);
+            $doctor = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($doctor) {
+                $doctor_id = $doctor['id'];
+            } else {
+                header("Location: /resources/views/auth/login.php");
+                exit;
+            }
         } elseif ($role !== 'admin') {
-            // Si no es admin ni doctor, no tiene permiso
             header("Location: /resources/views/auth/login.php");
             exit;
         }
 
-        // Obtener eventos, filtrando si es doctor
         $eventos = Calendar::getEvents($doctor_id);
 
         return [

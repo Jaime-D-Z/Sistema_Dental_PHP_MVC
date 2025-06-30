@@ -70,22 +70,24 @@ require_once __DIR__ . '/../../../config/auth.php';
 
 <!-- Menú superior -->
 <nav class="navbar navbar-expand-lg topbar px-4 py-2">
-  <a class="navbar-brand fw-bold text-primary" href="#">🦷 ODONTOLOGÍA TC</a>
-  <div class="collapse navbar-collapse">
-    <div class="navbar-nav">
-      <a class="nav-link" href="/index.php">Inicio</a>
-      <a class="nav-link" href="#">Mantenimiento</a>
-      <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
-      <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
-      <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
-    </div>
-  </div>
-  <div class="ms-auto">
-    <span class="text-success me-3">Admin Tarea Completa</span>
-        <a class="btn btn-outline-danger btn-sm" href="/resources/views/auth/logout.php">
-      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+     <a class="navbar-brand fw-bold text-primary" href="/resources/views/layouts/index.php">
+        🦷 ODONTOLOGÍA TC
     </a>
-  </div>
+    <div class="collapse navbar-collapse">
+        <div class="navbar-nav">
+            <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
+            <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
+            <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
+            <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
+        </div>
+    </div>
+    <div class="ms-auto">
+        <span class="text-success me-3">Admin Tarea Completa</span>
+        <a class="btn btn-outline-danger btn-sm" href="/resources/views/auth/logout.php">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </a>
+    </div>
 </nav>
 
 <!-- Contenido de Reportes -->

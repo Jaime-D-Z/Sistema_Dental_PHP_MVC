@@ -11,8 +11,6 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'doctor') {
     exit;
 }
 
-$doctor_id = $_SESSION['user']['id'];
-
 $controller = new CalendarController();
 $data = $controller->index();
 $eventos = $data['eventos'];
@@ -23,9 +21,12 @@ $eventos = $data['eventos'];
 <head>
   <meta charset="UTF-8" />
   <title>Calendario - Clínica Dental</title>
-<style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
     body {
       background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
     }
     .topbar {
       background-color: #ffffff;
@@ -74,19 +75,17 @@ $eventos = $data['eventos'];
     .today {
       background-color: #cce5ff;
     }
-  </style></head>
+  </style>
+</head>
 <body>
 
-<!-- Contenido principal -->
 <div class="container">
-  <div class="d-flex justify-content-start my-3">
-<a class="btn btn-outline-secondary" href="/resources/views/layouts/medico_index.php">← Volver al menú</a>
-      
-    </a>
+  <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+    <h3 class="text-primary">🗓️ Calendario de Citas</h3>
+    <a class="btn btn-outline-secondary" href="/resources/views/layouts/medico_index.php">← Volver al menú</a>
   </div>
 
-  <h2 class="mb-4 text-center">🗕️ Calendario de Citas</h2>
-  <h4 id="currentMonth" class="text-center mb-3 text-primary fw-semibold"></h4>
+  <h4 id="currentMonth" class="text-center mb-3 fw-semibold text-primary"></h4>
 
   <div class="d-flex justify-content-between mb-3">
     <div>
@@ -222,7 +221,6 @@ $eventos = $data['eventos'];
 
   function renderDayView(container) {
     const formatted = formatDate(currentDate);
-
     const list = document.createElement('div');
     list.className = 'calendar-day-view';
 
@@ -257,11 +255,13 @@ $eventos = $data['eventos'];
     currentView = 'day';
     renderCalendar();
   });
+
   document.getElementById('prevBtn').addEventListener('click', () => {
     if (currentView === 'month') currentDate.setMonth(currentDate.getMonth() - 1);
     else currentDate.setDate(currentDate.getDate() - 7);
     renderCalendar();
   });
+
   document.getElementById('nextBtn').addEventListener('click', () => {
     if (currentView === 'month') currentDate.setMonth(currentDate.getMonth() + 1);
     else currentDate.setDate(currentDate.getDate() + 7);
@@ -270,8 +270,6 @@ $eventos = $data['eventos'];
 
   document.addEventListener('DOMContentLoaded', renderCalendar);
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

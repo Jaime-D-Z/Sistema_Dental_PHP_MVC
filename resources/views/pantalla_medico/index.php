@@ -2,12 +2,16 @@
 require_once __DIR__ . '/../../../app/Http/Controllers/DoctorCitaController.php';
 require_once __DIR__ . '/../../../config/auth.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
 $controller = new DoctorCitaController();
 $data = $controller->index();
 
 $appointments = $data['appointments'];
 $treatments   = $data['treatments'];
-$doctor_id    = $data['doctor_id']; // Ya viene desde sesión
+$doctor_id    = $data['doctor_id'];
 ?>
 
 <!DOCTYPE html>
@@ -40,23 +44,36 @@ $doctor_id    = $data['doctor_id']; // Ya viene desde sesión
 </head>
 <body>
 
+<?php if (isset($_SESSION['flash'])): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      Swal.fire({
+        icon: '<?= $_SESSION['flash']['type'] ?>',
+        title: '<?= $_SESSION['flash']['type'] === 'success' ? 'Éxito' : 'Error' ?>',
+        text: '<?= $_SESSION['flash']['message'] ?>',
+        confirmButtonColor: '#3085d6'
+      });
+    });
+  </script>
+  <?php unset($_SESSION['flash']); ?>
+<?php endif; ?>
+
 <!-- Barra superior -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
   <a class="navbar-brand fw-bold text-primary" href="#">🩺 Médico</a>
   <div class="collapse navbar-collapse">
-        <div class="navbar-nav">
-            <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-            <a class="nav-link" href="#">Mantenimiento</a>
-            <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
-            <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
-            <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
-        </div>
+    <div class="navbar-nav">
+      <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
+      <a class="nav-link" href="#">Mantenimiento</a>
+      <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
+      <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
+      <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
     </div>
-    <span class="text-success me-3"><?= $_SESSION['user']['name'] ?></span>
-    <a class="btn btn-outline-danger btn-sm" href="/resources/views/auth/logout.php">
-      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-    </a>
   </div>
+  <span class="text-success me-3"><?= $_SESSION['user']['name'] ?></span>
+  <a class="btn btn-outline-danger btn-sm" href="/resources/views/auth/logout.php">
+    <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+  </a>
 </nav>
 
 <div class="container mt-4">
@@ -104,7 +121,7 @@ $doctor_id    = $data['doctor_id']; // Ya viene desde sesión
 <!-- Modal Nueva Cita -->
 <div class="modal fade" id="nuevaCitaModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
-    <form action="guardar_cita.php" method="POST">
+    <form action="guardar_cita.php" method="POST" onsubmit="return validarFormulario();">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
           <h5 class="modal-title">Registrar Nueva Cita</h5>
@@ -139,7 +156,7 @@ $doctor_id    = $data['doctor_id']; // Ya viene desde sesión
           </div>
           <div class="mb-3">
             <label class="form-label">Estado</label>
-            <select name="status" class="form-select">
+            <select name="status" class="form-select" required>
               <option value="asignado">Asignado</option>
               <option value="atendido">Atendido</option>
             </select>
@@ -165,6 +182,27 @@ $doctor_id    = $data['doctor_id']; // Ya viene desde sesión
     </form>
   </div>
 </div>
+
+<script>
+  function validarFormulario() {
+    const dni = document.querySelector('[name="dni_paciente"]').value.trim();
+    const tratamiento = document.querySelector('[name="treatment_id"]').value;
+    const fecha = document.querySelector('[name="date"]').value;
+    const hora = document.querySelector('[name="time"]').value;
+    const estado = document.querySelector('[name="status"]').value;
+
+    if (!dni || !tratamiento || !fecha || !hora || !estado) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, completa todos los campos requeridos.'
+      });
+      return false;
+    }
+
+    return true;
+  }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

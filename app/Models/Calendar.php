@@ -3,10 +3,17 @@
 require_once __DIR__ . '/../../config/Database.php';
 
 class Calendar {
-    // Ahora recibe un parámetro opcional $doctor_id para filtrar citas por doctor
+    /**
+     * Obtiene eventos de citas médicas.
+     * Si se proporciona $doctor_id, solo devuelve citas de ese doctor.
+     *
+     * @param int|null $doctor_id
+     * @return array
+     */
     public static function getEvents($doctor_id = null) {
         $db = Database::connect();
 
+        // Base SQL
         $sql = "
             SELECT 
                 a.date AS inicio,
@@ -19,21 +26,22 @@ class Calendar {
                 AND a.is_deleted = 0
         ";
 
-        // Si se pasa doctor_id, agregamos filtro
-        if ($doctor_id !== null) {
-            $sql .= " AND a.doctor_id = :doctor_id ";
+        // Si hay un doctor logueado, filtramos
+        if (!is_null($doctor_id)) {
+            $sql .= " AND a.doctor_id = :doctor_id";
         }
 
         $sql .= " ORDER BY a.date, a.time";
 
         $stmt = $db->prepare($sql);
 
-        if ($doctor_id !== null) {
-            $stmt->bindValue(':doctor_id', $doctor_id, \PDO::PARAM_INT);
+        // Enlazar doctor_id si aplica
+        if (!is_null($doctor_id)) {
+            $stmt->bindValue(':doctor_id', $doctor_id, PDO::PARAM_INT);
         }
 
         $stmt->execute();
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

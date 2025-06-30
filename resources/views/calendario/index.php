@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../../app/Http/Controllers/CalendarController.php';
 require_once __DIR__ . '/../../../config/auth.php';
+require_once __DIR__ . '/../../../config/theme.php';
+
 
 
 $controller = new CalendarController();
@@ -77,7 +79,7 @@ $eventos = $data['eventos'];
   <div class="collapse navbar-collapse">
     <div class="navbar-nav">
       <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-      <a class="nav-link" href="#">Mantenimiento</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
       <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
       <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
       <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
@@ -85,6 +87,8 @@ $eventos = $data['eventos'];
   </div>
   <div class="ms-auto">
     <span class="text-success me-3">Admin Tarea Completa</span>
+      <i class="bi bi-moon theme-toggle" onclick="toggleTheme()" id="themeIcon" title="Cambiar tema"></i>
+
         <a class="btn btn-outline-danger btn-sm" href="/resources/views/auth/logout.php">
       <i class="bi bi-box-arrow-right"></i> Cerrar sesión
     </a>

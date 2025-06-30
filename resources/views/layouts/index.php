@@ -11,8 +11,6 @@ if (!isset($_SESSION['user'])) {
 }
 ?>
 
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -25,8 +23,16 @@ if (!isset($_SESSION['user'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        :root {
+            --bg-light: #f8f9fa;
+            --text-dark: #212529;
+            --card-bg-light: white;
+            --card-hover-light: #e9f1ff;
+        }
+
         body {
-            background-color: #f8f9fa;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
         }
 
         .topbar {
@@ -50,12 +56,12 @@ if (!isset($_SESSION['user'])) {
             padding: 20px;
             border-radius: 15px;
             transition: all 0.3s ease;
-            background-color: white;
+            background-color: var(--card-bg-light);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .dashboard-card:hover {
-            background-color: #e9f1ff;
+            background-color: var(--card-hover-light);
             transform: translateY(-5px);
         }
 
@@ -71,8 +77,33 @@ if (!isset($_SESSION['user'])) {
             font-weight: 600;
         }
 
-        .container {
-            margin-top: 30px;
+        body.dark-mode {
+            --bg-light: #121212;
+            --text-dark: #f1f1f1;
+            --card-bg-light: #1e1e1e;
+            --card-hover-light: #2c2c2c;
+        }
+
+        .dark-mode .topbar {
+            background-color: #1f1f1f;
+            border-bottom: 1px solid #444;
+        }
+
+        .dark-mode .topbar a {
+            color: #66b2ff;
+        }
+
+        .dark-mode .dashboard-card i {
+            color: #66b2ff;
+        }
+
+        .dark-mode a.text-dark {
+            color: #f1f1f1 !important;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            font-size: 1.25rem;
         }
     </style>
 </head>
@@ -84,143 +115,88 @@ if (!isset($_SESSION['user'])) {
   <div class="collapse navbar-collapse">
     <div class="navbar-nav">
       <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-      <a class="nav-link" href="#">Mantenimiento</a>
+      <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
       <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
       <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
       <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
     </div>
   </div>
-  <div class="ms-auto">
-    <span class="text-success me-3">Admin Tarea Completa</span>
-        <a class="btn btn-outline-danger btn-sm" href="/resources/views/auth/logout.php">
+  <div class="ms-auto d-flex align-items-center gap-3">
+    <span class="text-success">Admin Tarea Completa</span>
+    <i class="bi bi-moon theme-toggle" onclick="toggleTheme()" id="themeIcon"></i>
+    <a class="btn btn-outline-danger btn-sm" href="/resources/views/auth/logout.php">
       <i class="bi bi-box-arrow-right"></i> Cerrar sesión
     </a>
   </div>
 </nav>
+
 <!-- Dashboard Grid -->
-<div class="container">
-    <div class="row g-4">
+<div class="container mt-4">
+  <div class="row g-4">
 
+    <?php
+    $items = [
+        ["Usuarios", "bi-people", "usuarios"],
+        ["Pacientes", "bi-person-vcard", "pacientes"],
+        ["Especialidades", "bi-clipboard-plus", "especialidades"],
+        ["Médicos", "bi-person-badge", "medicos"],
+        ["Tratamientos", "bi-capsule", "tratamientos"],
+        ["Citas", "bi-calendar-check", "citas"],
+        ["Odontograma", "bi-emoji-smile", "odontograma"],
+        ["Historial Citas", "bi-journal-medical", "historial"],
+        ["Calendario", "bi-calendar-event", "calendario"],
+        ["Pagos", "bi-currency-dollar", "pagos"],
+        ["Reportes", "bi-printer", "reportes"],
+        ["Resumen", "bi-bar-chart-line", "resumen"],
+        ["Tendencia", "bi-graph-up-arrow", "tendencias"]
+    ];
+
+    foreach ($items as [$name, $icon, $url]) {
+        echo <<<HTML
         <div class="col-6 col-md-3">
-            <a href="/resources/views/usuarios/index.php" class="text-decoration-none text-dark">
+            <a href="/resources/views/$url/index.php" class="text-decoration-none text-dark">
                 <div class="dashboard-card">
-                    <i class="bi bi-people"></i>
-                    <span>Usuarios</span>
+                    <i class="bi $icon"></i>
+                    <span>$name</span>
                 </div>
             </a>
         </div>
+        HTML;
+    }
+    ?>
 
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/pacientes/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-person-vcard"></i>
-                    <span>Pacientes</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/especialidades/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-clipboard-plus"></i>
-                    <span>Especialidades</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/medicos/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-person-badge"></i>
-                    <span>Médicos</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/tratamientos/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-capsule"></i>
-                    <span>Tratamientos</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/citas/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-calendar-check"></i>
-                    <span>Citas</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/odontograma/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-emoji-smile"></i>
-                    <span>Odontograma</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/historial/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-journal-medical"></i>
-                    <span>Historial Citas</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/calendario/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-calendar-event"></i>
-                    <span>Calendario</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/pagos/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-currency-dollar"></i>
-                    <span>Pagos</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/reportes/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-printer"></i>
-                    <span>Reportes</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/resumen/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-bar-chart-line"></i>
-                    <span>Resumen</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-md-3">
-            <a href="/resources/views/tendencias/index.php" class="text-decoration-none text-dark">
-                <div class="dashboard-card">
-                    <i class="bi bi-graph-up-arrow"></i>
-                    <span>Tendencia</span>
-                </div>
-            </a>
-        </div>
-
-    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleTheme() {
+    const body = document.body;
+    body.classList.toggle("dark-mode");
+
+    const icon = document.getElementById("themeIcon");
+    if (body.classList.contains("dark-mode")) {
+      icon.classList.remove("bi-moon");
+      icon.classList.add("bi-sun");
+      localStorage.setItem("theme", "dark");
+    } else {
+      icon.classList.remove("bi-sun");
+      icon.classList.add("bi-moon");
+      localStorage.setItem("theme", "light");
+    }
+  }
+
+  // Aplicar preferencia guardada
+  window.onload = () => {
+    const theme = localStorage.getItem("theme");
+    const icon = document.getElementById("themeIcon");
+
+    if (theme === "dark") {
+      document.body.classList.add("dark-mode");
+      icon.classList.remove("bi-moon");
+      icon.classList.add("bi-sun");
+    }
+  };
+</script>
 </body>
 </html>

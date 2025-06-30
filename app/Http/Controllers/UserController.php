@@ -3,12 +3,13 @@ require_once __DIR__ . '/../../Models/User.php';
 
 class UserController {
     public function index() {
-        $search = $_GET['search'] ?? '';
-        $search = trim($search);
+        $search = trim($_GET['search'] ?? '');
+        $users = [];
 
-        $users = User::all($search);
+        if ($search === '' || mb_strlen($search) >= 3) {
+            $users = User::all($search);
+        }
 
-        // Retorna variables para la vista
         return [
             'users' => $users,
             'search' => $search

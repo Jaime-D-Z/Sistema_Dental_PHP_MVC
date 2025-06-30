@@ -10,12 +10,16 @@ class Doctor
                 FROM doctors d
                 JOIN specialties s ON d.specialty_id = s.id
                 WHERE d.is_deleted = 0";
-
         $params = [];
 
         if (!empty($search)) {
-            $sql .= " AND (d.first_name LIKE :search OR d.last_name LIKE :search OR d.dni LIKE :search)";
-            $params[':search'] = "%$search%";
+            $sql .= " AND (
+                LOWER(d.first_name) LIKE :search OR
+                LOWER(d.last_name) LIKE :search OR
+                LOWER(CONCAT(d.first_name, ' ', d.last_name)) LIKE :search OR
+                d.dni LIKE :search
+            )";
+            $params[':search'] = '%' . strtolower($search) . '%';
         }
 
         $sql .= " ORDER BY d.id DESC";

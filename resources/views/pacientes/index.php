@@ -39,7 +39,7 @@ $search   = $data['search'];
     <div class="collapse navbar-collapse">
         <div class="navbar-nav">
             <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-            <a class="nav-link" href="#">Mantenimiento</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
             <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
             <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
             <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
@@ -57,16 +57,44 @@ $search   = $data['search'];
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex gap-2">
-<a class="btn btn-outline-secondary" href="/resources/views/layouts/index.php">← Volver al menú</a>            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente">
+<a class="btn btn-outline-secondary" href="/resources/views/layouts/index.php">← Volver al menú</a>          
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoPaciente">
                 <i class="bi bi-person-plus"></i> Nuevo Paciente
             </button>
         </div>
 
-        <form method="GET" class="d-flex" style="gap:10px;">
-            <input type="text" name="search" class="form-control" placeholder="Buscar paciente..." value="<?= htmlspecialchars($search) ?>">
-            <button type="submit" class="btn btn-success"><i class="bi bi-search"></i></button>
-            <a href="pacientes.php" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise"></i></a>
-        </form>
+       <form method="GET" class="d-flex" style="gap:10px;">
+    <input type="text" name="search" class="form-control" placeholder="Buscar paciente..." value="<?= htmlspecialchars($search) ?>">
+    <button type="submit" class="btn btn-success"><i class="bi bi-search"></i></button>
+    <a href="index.php" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise"></i></a>
+</form>
+<?php if (isset($_GET['search']) && trim($_GET['search']) !== ''): ?>
+    <?php if (strlen(trim($_GET['search'])) < 2): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Búsqueda muy corta',
+                    text: 'Escribe al menos 2 letras para buscar pagos.',
+                    confirmButtonColor: '#ffc107'
+                });
+
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            });
+        </script>
+    <?php else: ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            });
+        </script>
+    <?php endif; ?>
+<?php endif; ?>
+
+
+
     </div>
 
     <div class="table-responsive">
@@ -249,6 +277,7 @@ $search   = $data['search'];
         });
     });
 </script>
+
 
 
 </body>

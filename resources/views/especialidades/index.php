@@ -37,7 +37,7 @@ $errors      = $data['errors'];
     <div class="collapse navbar-collapse">
         <div class="navbar-nav">
             <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-            <a class="nav-link" href="#">Mantenimiento</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
             <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
             <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
             <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
@@ -61,6 +61,25 @@ $errors      = $data['errors'];
             <button type="submit" class="btn btn-success"><i class="bi bi-search"></i></button>
             <a href="index.php" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise"></i></a>
         </form>
+        <?php if (isset($_GET['search']) && strlen(trim($_GET['search'])) < 2): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Búsqueda demasiado corta',
+        text: 'Por favor, escribe al menos 2 letras para buscar por paciente.',
+        confirmButtonColor: '#ffc107'
+      });
+
+      // Limpiar la URL de los parámetros después de mostrar el alert
+      if (window.history.replaceState) {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    });
+  </script>
+<?php endif; ?>
+
     </div>
 
     <div class="card">

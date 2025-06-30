@@ -6,22 +6,29 @@ class Patient {
         $db = Database::connect();
 
         $sql = "SELECT * FROM patients WHERE is_deleted = 0 AND is_active = 1";
-        if (!empty($search)) {
-            $sql .= " AND (first_name LIKE :search OR dni LIKE :search OR email LIKE :search)";
+        $params = [];
+
+        // Solo si la búsqueda es válida (2 letras o más)
+        if (!empty($search) && strlen(trim($search)) >= 2) {
+            $sql .= " AND (
+                LOWER(first_name) LIKE :search OR
+                LOWER(last_name) LIKE :search OR
+                LOWER(CONCAT(first_name, ' ', last_name)) LIKE :search OR
+                dni LIKE :search OR
+                LOWER(email) LIKE :search
+            )";
+            $params[':search'] = '%' . strtolower($search) . '%';
         }
+
         $sql .= " ORDER BY id DESC";
 
         $stmt = $db->prepare($sql);
-        if (!empty($search)) {
-            $stmt->bindValue(':search', "%$search%");
-        }
-        $stmt->execute();
+        $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
-   public static function findByDNI($dni) {
+    public static function findByDNI($dni) {
         $db = Database::connect();
         $stmt = $db->prepare("SELECT * FROM patients WHERE dni = ?");
         $stmt->execute([$dni]);

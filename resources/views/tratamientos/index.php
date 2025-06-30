@@ -34,7 +34,7 @@ $search = $data['search'];
     <div class="collapse navbar-collapse">
         <div class="navbar-nav">
             <a class="nav-link" href="/resources/views/layouts/index.php">Inicio</a>
-            <a class="nav-link" href="#">Mantenimiento</a>
+        <a class="nav-link" href="/resources/views/config/index.php">Mantenimiento</a>
             <a class="nav-link" href="/resources/views/citas/index.php">Citas</a>
             <a class="nav-link" href="/resources/views/historial/index.php">Historial Citas</a>
             <a class="nav-link" href="/resources/views/calendario/index.php">Calendario</a>
@@ -55,11 +55,37 @@ $search = $data['search'];
         ➕ Nuevo Tratamiento
       </button>
     </div>
-    <form method="GET" class="d-flex" style="gap:10px;">
-      <input type="text" name="search" class="form-control" placeholder="Buscar Tratamientos..." value="<?= htmlspecialchars($search) ?>">
-      <button type="submit" class="btn btn-success"><i class="bi bi-search"></i></button>
+   <form method="GET" class="d-flex" style="gap:10px;" onsubmit="return validarBusqueda()">
+
+<input type="text" id="inputBusqueda" name="search" class="form-control" placeholder="Buscar Tratamientos..." value="<?= htmlspecialchars($search) ?>">
+
       <a href="index.php" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise"></i></a>
     </form>
+    <?php if (isset($_GET['search']) && trim($_GET['search']) !== ''): ?>
+    <?php if (strlen(trim($_GET['search'])) < 3): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Búsqueda muy corta',
+                    text: 'Por favor, escribe al menos 3 letras para buscar tratamientos.',
+                    confirmButtonColor: '#ffc107'
+                });
+
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            });
+        </script>
+    <?php else: ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            });
+        </script>
+    <?php endif; ?>
+<?php endif; ?>
+
   </div>
 
   <table class="table table-bordered align-middle text-center">
@@ -158,6 +184,21 @@ $errors = $errors ?? [];
         }
       });
     });
+
+    function validarBusqueda() {
+  const input = document.getElementById('inputBusqueda').value.trim();
+  if (input.length > 0 && input.length < 3) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Búsqueda muy corta',
+      text: 'Por favor, ingresa al menos 3 letras para buscar.',
+      confirmButtonColor: '#3085d6'
+    });
+    return false; // evitar el submit del formulario
+  }
+  return true;
+}
+
   });
 </script>
 </body></html>

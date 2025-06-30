@@ -24,7 +24,9 @@ $sql = "SELECT
         JOIN patients p ON a.patient_id = p.id
         JOIN treatments t ON a.treatment_id = t.id
         LEFT JOIN doctors m ON a.doctor_id = m.id
-        WHERE a.id = (SELECT appointment_id FROM payments WHERE id = :id)";
+        WHERE a.id = (
+            SELECT appointment_id FROM payments WHERE id = :id AND is_deleted = 0
+        )";
 
 
 $stmt = $conn->prepare($sql);

@@ -129,10 +129,10 @@ if (!isset($_SESSION['user'])) {
                     <span>Calendario</span>
                 </div>
             </a>
-        </div>
+        </div>  
 
         <div class="col-6 col-md-3">
-            <a href="/resources/views/pagos/index.php" class="text-decoration-none text-dark">
+            <a href="/resources/views/pantalla_medico/pago_medico.php"  class="text-decoration-none text-dark">
                 <div class="dashboard-card">
                     <i class="bi bi-currency-dollar"></i>
                     <span>Pagos</span>
