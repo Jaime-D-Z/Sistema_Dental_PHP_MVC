@@ -28,24 +28,27 @@ Este es un **Sistema de Gestión Dental** desarrollado en **PHP** bajo el patró
 - SweetAlert2
 - HTML5 / CSS3
 
+
+
 ## 🧱 Estructura del Proyecto
 
+```plaintext
 Sistema_Dental_PHP_MVC/
 │
 ├── app/
-│ ├── Http/
-│ │ └── Controllers/ # Controladores MVC
-│ └── Models/ # Modelos conectados a la base de datos
+│   ├── Http/
+│   │   └── Controllers/        # Controladores MVC
+│   └── Models/                 # Modelos conectados a la base de datos
 │
-├── auth/ # Lógica de autenticación (login.php, logout.php)
-├── config/ # Configuración de conexión a DB y autenticación
-├── public/ # Archivos accesibles públicamente (assets, index.php)
+├── auth/                       # Lógica de autenticación (login.php, logout.php)
+├── config/                     # Configuración de conexión a DB y autenticación
+├── public/                     # Archivos accesibles públicamente (assets, index.php)
 │
 ├── resources/
-│ └── views/ # Vistas HTML + PHP
+│   └── views/                  # Vistas HTML + PHP
 │
-├── routes/ # Rutas del proyecto
-└── sql/ # Script de base de datos (.sql)
+├── routes/                     # Rutas del proyecto
+└── sql/                        # Script de base de datos (.sql)
 
 
 ## ⚙️ Instalación y uso
