@@ -63,23 +63,20 @@ Editar
 
 1. Clona el repositorio:
 
-   ```bash
    git clone https://github.com/Jaime-D-Z/Sistema_Dental_PHP_MVC.git
 Importa el archivo sql/dental_db.sql a tu gestor de bases de datos (por ejemplo, phpMyAdmin).
 
 Configura la conexión en config/Database.php:
 
 php
-Copiar
-Editar
+
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'dental_db');
+define('DB_NAME', 'clinic');
 define('DB_USER', 'root');
 define('DB_PASS', '');
+
 Abre el navegador y accede al sistema desde la pantalla de inicio de sesión:
 
-bash
-Copiar
-Editar
+
 http://localhost/Sistema_Dental_PHP_MVC/auth/login.php
-📸 Capturas
+
