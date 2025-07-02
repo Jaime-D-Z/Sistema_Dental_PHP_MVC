@@ -73,11 +73,13 @@ Sistema_Dental_PHP_MVC/
 
 Configura la conexión en config/Database.php:
 
+```plaintext
 
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'clinic');
 define('DB_USER', 'root');
 define('DB_PASS', '');
+```
 Abre el navegador y accede al sistema desde la pantalla de inicio de sesión:
 
 
