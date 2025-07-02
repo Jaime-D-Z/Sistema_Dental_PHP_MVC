@@ -81,4 +81,11 @@ define('DB_PASS', '');
 Abre el navegador y accede al sistema desde la pantalla de inicio de sesión:
 
 
-http://localhost/Sistema_Dental_PHP_MVC/auth/login.php
+http://localhost/Sistema_Dental_PHP_MVC/resources/views/auth/login.php
+
+Si usas serve project y recomendable para que te salgan todas pantallas :
+http://localhost:3000/resources/views/auth/login.php
+
+Entrar con el usuario admin :
+user: ee936824@gmail.com
+password :admin123
