@@ -50,6 +50,8 @@ Sistema_Dental_PHP_MVC/
 ├── routes/                     # Rutas del proyecto
 └── sql/                        # Script de base de datos (.sql)
 
+```
+
 
 ## ⚙️ Instalación y uso
 
