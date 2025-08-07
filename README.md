@@ -47,7 +47,7 @@ Sistema_Dental_PHP_MVC/
 ├── resources/
 │   └── views/                  # Vistas HTML + PHP
 │
-├── routes/                     # Rutas del proyecto
+├
 └── sql/                        # Script de base de datos (.sql)
 
 ```
