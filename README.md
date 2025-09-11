@@ -38,7 +38,7 @@ Sistema_Dental_PHP_MVC/
 ├── app/
 │   ├── Http/
 │   │   └── Controllers/        # Controladores MVC
-│   └── Models/                 # Modelos conectados a la base de datos
+│   └── Models/                 # Modelos conectados a la base de dato
 │
 ├── auth/                       # Lógica de autenticación (login.php, logout.php)
 ├── config/                     # Configuración de conexión a DB y autenticación
