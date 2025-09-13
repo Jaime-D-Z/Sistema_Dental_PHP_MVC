@@ -61,7 +61,7 @@ Sistema_Dental_PHP_MVC/
 - MySQL 5.7 o superior
 - Servidor local (XAMPP, Laragon, UniServer, etc.)
 
-### Pasos
+### Pasos importantes a seguir
 
 1. Clona el repositorio:
 
