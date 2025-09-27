@@ -91,3 +91,5 @@ http://localhost:3000/resources/views/auth/login.php
 Entrar con el usuario admin :
 user: ee936824@gmail.com
 password :admin123
+
+#Falta corregir errores
