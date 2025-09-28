@@ -26,7 +26,7 @@ Este es un **Sistema de Gestión Dental** desarrollado en **PHP** bajo el patró
 - jQuery
 - DataTables
 - SweetAlert2
-- HTML5 / CSS3
+- HTML5 / CSS3a
 
 
 
